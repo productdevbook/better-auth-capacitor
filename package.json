@@ -1,0 +1,80 @@
+{
+  "name": "better-auth-capacitor",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Better Auth client plugin for Capacitor/Ionic mobile apps",
+  "author": "productdevbook",
+  "license": "MIT",
+  "homepage": "https://github.com/productdevbook/better-auth-capacitor#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/productdevbook/better-auth-capacitor"
+  },
+  "bugs": {
+    "url": "https://github.com/productdevbook/better-auth-capacitor/issues"
+  },
+  "keywords": [
+    "better-auth",
+    "capacitor",
+    "ionic",
+    "authentication",
+    "oauth",
+    "mobile"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./plugins": {
+      "types": "./dist/plugins/index.d.mts",
+      "import": "./dist/plugins/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "pnpm build",
+    "bumpp": "bumpp package.json",
+    "release": "pnpm build && pnpm bumpp && pnpm publish --no-git-checks --access public"
+  },
+  "peerDependencies": {
+    "@capacitor/app": ">=6.0.0",
+    "@capacitor/browser": ">=6.0.0",
+    "@capacitor/core": ">=6.0.0",
+    "@capacitor/network": ">=6.0.0",
+    "@capacitor/preferences": ">=6.0.0",
+    "better-auth": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@capacitor/app": {
+      "optional": true
+    },
+    "@capacitor/browser": {
+      "optional": true
+    },
+    "@capacitor/network": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^7.2.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/network": "^8.0.0",
+    "@capacitor/preferences": "^8.0.0",
+    "better-auth": "^1.4.18",
+    "bumpp": "^10.4.0",
+    "eslint": "^9.39.2",
+    "tsdown": "^0.20.1",
+    "typescript": "^5.9.3"
+  }
+}
