@@ -40,8 +40,8 @@ pnpm add @capacitor/network
 ### Basic Setup
 
 ```typescript
-import { createAuthClient } from 'better-auth/client'
 import { capacitorClient } from 'better-auth-capacitor'
+import { createAuthClient } from 'better-auth/client'
 
 const authClient = createAuthClient({
   baseURL: 'https://api.example.com',
@@ -111,7 +111,7 @@ if (token) {
 If you have custom authentication endpoints that don't use the Better Auth client (e.g., dev login, server-side auth), you can manually store the session token:
 
 ```typescript
-import { setCapacitorAuthToken, clearCapacitorAuthToken } from 'better-auth-capacitor'
+import { clearCapacitorAuthToken, setCapacitorAuthToken } from 'better-auth-capacitor'
 
 // After custom login endpoint
 const response = await fetch('/api/auth/custom-login', {
@@ -140,8 +140,8 @@ await clearCapacitorAuthToken({ storagePrefix: 'better-auth' })
 Track which method the user last used to sign in:
 
 ```typescript
-import { createAuthClient } from 'better-auth/client'
 import { capacitorClient, lastLoginMethodClient } from 'better-auth-capacitor'
+import { createAuthClient } from 'better-auth/client'
 
 const authClient = createAuthClient({
   baseURL: 'https://api.example.com',
@@ -245,7 +245,8 @@ import { isNativePlatform } from 'better-auth-capacitor'
 
 if (isNativePlatform()) {
   // Running in Capacitor native app
-} else {
+}
+else {
   // Running in web browser
 }
 ```
