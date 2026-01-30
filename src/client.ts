@@ -68,6 +68,117 @@ export interface GetCapacitorAuthTokenOptions {
   cookiePrefix?: string
 }
 
+export interface SetCapacitorAuthTokenOptions {
+  /**
+   * The session token to store
+   */
+  token: string
+  /**
+   * Token expiration date (ISO string or Date)
+   * @default 7 days from now
+   */
+  expiresAt?: string | Date
+  /**
+   * Prefix for storage keys
+   * @default 'better-auth'
+   */
+  storagePrefix?: string
+  /**
+   * Cookie prefix used by better-auth
+   * @default 'better-auth'
+   */
+  cookiePrefix?: string
+}
+
+/**
+ * Store a session token in Capacitor Preferences storage
+ * Useful for custom auth endpoints that bypass the Better Auth client
+ *
+ * @example
+ * ```ts
+ * // After custom login endpoint
+ * const response = await fetch('/api/auth/custom-login', { ... })
+ * const data = await response.json()
+ *
+ * await setCapacitorAuthToken({
+ *   token: data.session.token,
+ *   expiresAt: data.session.expiresAt,
+ *   storagePrefix: 'my-app',
+ * })
+ * ```
+ */
+export async function setCapacitorAuthToken(opts: SetCapacitorAuthTokenOptions): Promise<boolean> {
+  if (!isNativePlatform())
+    return false
+
+  const { token, storagePrefix = 'better-auth', cookiePrefix = 'better-auth' } = opts
+  const cookieName = `${storagePrefix}_cookie`
+
+  // Calculate expiry
+  const expiresAt = opts.expiresAt
+    ? (opts.expiresAt instanceof Date ? opts.expiresAt.toISOString() : opts.expiresAt)
+    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Default: 7 days
+
+  try {
+    const { Preferences } = await getPreferencesMod()
+    const normalizedCookieName = normalizeCookieName(cookieName)
+
+    // Get existing cookies
+    const existingCookie = (await Preferences.get({ key: normalizedCookieName }))?.value
+    let cookieData: Record<string, StoredCookie> = {}
+
+    if (existingCookie) {
+      try {
+        cookieData = JSON.parse(existingCookie)
+      }
+      catch {
+        // Invalid JSON, start fresh
+      }
+    }
+
+    // Store token with both regular and secure prefixed names
+    // This ensures compatibility regardless of server's useSecureCookies setting
+    const baseCookieName = `${cookiePrefix}.session_token`
+    const secureCookieName = `${SECURE_COOKIE_PREFIX}${baseCookieName}`
+
+    cookieData[baseCookieName] = { value: token, expires: expiresAt }
+    cookieData[secureCookieName] = { value: token, expires: expiresAt }
+
+    await Preferences.set({
+      key: normalizedCookieName,
+      value: JSON.stringify(cookieData),
+    })
+
+    return true
+  }
+  catch {
+    return false
+  }
+}
+
+/**
+ * Clear the stored session token from Capacitor Preferences
+ * Useful for custom logout flows
+ */
+export async function clearCapacitorAuthToken(opts?: Pick<SetCapacitorAuthTokenOptions, 'storagePrefix'>): Promise<boolean> {
+  if (!isNativePlatform())
+    return false
+
+  const storagePrefix = opts?.storagePrefix || 'better-auth'
+  const cookieName = `${storagePrefix}_cookie`
+  const localCacheName = `${storagePrefix}_session_data`
+
+  try {
+    const { Preferences } = await getPreferencesMod()
+    await Preferences.remove({ key: normalizeCookieName(cookieName) })
+    await Preferences.remove({ key: normalizeCookieName(localCacheName) })
+    return true
+  }
+  catch {
+    return false
+  }
+}
+
 /**
  * Get the bearer token from Capacitor Preferences storage
  * Useful for adding Authorization header to fetch requests in native apps

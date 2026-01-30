@@ -1,5 +1,6 @@
 export {
   capacitorClient,
+  clearCapacitorAuthToken,
   getCapacitorAuthToken,
   getCookie,
   getSetCookie,
@@ -7,11 +8,13 @@ export {
   isNativePlatform,
   normalizeCookieName,
   parseSetCookieHeader,
+  setCapacitorAuthToken,
 } from './client'
 
 export type {
   CapacitorClientOptions,
   GetCapacitorAuthTokenOptions,
+  SetCapacitorAuthTokenOptions,
 } from './client'
 
 export { setupCapacitorFocusManager } from './focus-manager'

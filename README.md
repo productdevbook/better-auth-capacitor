@@ -106,6 +106,35 @@ if (token) {
 }
 ```
 
+### Storing Token from Custom Auth Endpoints
+
+If you have custom authentication endpoints that don't use the Better Auth client (e.g., dev login, server-side auth), you can manually store the session token:
+
+```typescript
+import { setCapacitorAuthToken, clearCapacitorAuthToken } from 'better-auth-capacitor'
+
+// After custom login endpoint
+const response = await fetch('/api/auth/custom-login', {
+  method: 'POST',
+  body: JSON.stringify({ email: 'user@example.com' }),
+})
+const data = await response.json()
+
+// Store the token in Capacitor Preferences
+await setCapacitorAuthToken({
+  token: data.session.token,
+  expiresAt: data.session.expiresAt, // Optional, defaults to 7 days
+  storagePrefix: 'better-auth',
+  cookiePrefix: 'better-auth',
+})
+
+// Now getSession() will work correctly
+const session = await authClient.getSession()
+
+// To clear the token (custom logout)
+await clearCapacitorAuthToken({ storagePrefix: 'better-auth' })
+```
+
 ### Last Login Method Plugin
 
 Track which method the user last used to sign in:
@@ -229,6 +258,8 @@ if (isNativePlatform()) {
 |--------|-------------|
 | `capacitorClient(options?)` | Main Better Auth plugin for Capacitor |
 | `getCapacitorAuthToken(options?)` | Get bearer token from storage |
+| `setCapacitorAuthToken(options)` | Store token for custom auth endpoints |
+| `clearCapacitorAuthToken(options?)` | Clear stored auth token |
 | `isNativePlatform()` | Check if running in Capacitor native app |
 | `setupCapacitorFocusManager()` | Set up app focus tracking |
 | `setupCapacitorOnlineManager()` | Set up network connectivity tracking |
