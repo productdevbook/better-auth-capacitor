@@ -44,7 +44,7 @@
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "pnpm build",
     "bumpp": "bumpp package.json",
-    "release": "pnpm build && pnpm bumpp && pnpm publish --no-git-checks --access public"
+    "release": "pnpm build && pnpm bumpp"
   },
   "peerDependencies": {
     "@capacitor/app": ">=6.0.0",
