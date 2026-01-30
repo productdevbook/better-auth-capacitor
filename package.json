@@ -2,6 +2,7 @@
   "name": "better-auth-capacitor",
   "type": "module",
   "version": "0.1.1",
+  "packageManager": "pnpm@10.28.1",
   "description": "Better Auth client plugin for Capacitor/Ionic mobile apps",
   "author": "productdevbook",
   "license": "MIT",
