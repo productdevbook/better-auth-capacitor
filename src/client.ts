@@ -671,6 +671,33 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
   }
 }
 
+/**
+ * Convenience wrapper that adds capacitorClient plugin and sets disableDefaultFetchPlugins on native.
+ * This prevents better-auth's built-in redirectPlugin from opening Safari during OAuth sign-in.
+ *
+ * @example
+ * ```ts
+ * import { withCapacitor } from 'better-auth-capacitor/client'
+ *
+ * const client = createAuthClient(withCapacitor({
+ *   baseURL: 'https://my-app.com',
+ * }, { scheme: 'myapp' }))
+ * ```
+ */
+export function withCapacitor<T extends Record<string, any>>(
+  options: T,
+  capacitorOpts?: CapacitorClientOptions,
+): T & { disableDefaultFetchPlugins: boolean, plugins: BetterAuthClientPlugin[] } {
+  return {
+    ...options,
+    disableDefaultFetchPlugins: isNativePlatform() || !!(options as any).disableDefaultFetchPlugins,
+    plugins: [
+      ...((options as any).plugins || []),
+      capacitorClient(capacitorOpts),
+    ],
+  } as any
+}
+
 export * from './focus-manager'
 export * from './online-manager'
 export { parseSetCookieHeader } from 'better-auth/cookies'
