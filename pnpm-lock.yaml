@@ -21,9 +21,6 @@ importers:
       '@capacitor/app':
         specifier: ^8.0.0
         version: 8.0.0(@capacitor/core@8.0.2)
-      '@capacitor/browser':
-        specifier: ^8.0.0
-        version: 8.0.0(@capacitor/core@8.0.2)
       '@capacitor/core':
         specifier: ^8.0.2
         version: 8.0.2
@@ -173,11 +170,6 @@ packages:
 
   '@capacitor/app@8.0.0':
     resolution: {integrity: sha512-OwzIkUs4w433Bu9WWAEbEYngXEfJXZ9Wmdb8eoaqzYBgB0W9/3Ed/mh6sAYPNBAZlpyarmewgP7Nb+d3Vrh+xA==}
-    peerDependencies:
-      '@capacitor/core': '>=8.0.0'
-
-  '@capacitor/browser@8.0.0':
-    resolution: {integrity: sha512-xey7maszGABKuStvXDV4vXN+EzIyz0o7zlyzw4JKG6o/1GzqeqHqVuE+8Ux+Hks3DZji4LoriWZVgVF6mR6RGg==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -1905,10 +1897,6 @@ snapshots:
   '@better-fetch/fetch@1.1.21': {}
 
   '@capacitor/app@8.0.0(@capacitor/core@8.0.2)':
-    dependencies:
-      '@capacitor/core': 8.0.2
-
-  '@capacitor/browser@8.0.0(@capacitor/core@8.0.2)':
     dependencies:
       '@capacitor/core': 8.0.2
 
