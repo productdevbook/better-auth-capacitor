@@ -60,20 +60,44 @@ capacitor({
 
 ## Client Setup
 
+The recommended way is using `withCapacitor()` which handles everything automatically:
+
 ```typescript
-import { capacitorClient } from 'better-auth-capacitor/client'
+import { withCapacitor } from 'better-auth-capacitor/client'
+import { createAuthClient } from 'better-auth/client'
+
+const authClient = createAuthClient(withCapacitor({
+  baseURL: 'https://api.example.com',
+}, {
+  scheme: 'myapp',
+  storagePrefix: 'better-auth',
+}))
+```
+
+`withCapacitor()` does two things:
+- Adds `capacitorClient` plugin automatically
+- Sets `disableDefaultFetchPlugins: true` on native platforms, which prevents better-auth's built-in redirect plugin from opening Safari/Chrome during OAuth (the native auth sheet handles it instead)
+
+<details>
+<summary>Manual setup (without wrapper)</summary>
+
+```typescript
+import { capacitorClient, isNativePlatform } from 'better-auth-capacitor/client'
 import { createAuthClient } from 'better-auth/client'
 
 const authClient = createAuthClient({
   baseURL: 'https://api.example.com',
+  disableDefaultFetchPlugins: isNativePlatform(),
   plugins: [
     capacitorClient({
-      scheme: 'myapp', // For OAuth deep links
+      scheme: 'myapp',
       storagePrefix: 'better-auth',
     }),
   ],
 })
 ```
+
+</details>
 
 ### Configuration Options
 
@@ -239,6 +263,32 @@ await authClient.signIn.social({
 })
 ```
 
+## Post-OAuth Navigation
+
+On native, `signIn.social()` may not resolve after the auth session completes. Don't rely on awaiting it for navigation. Instead, poll for the token change:
+
+```typescript
+import { getCapacitorAuthToken } from 'better-auth-capacitor/client'
+
+// 1. Snapshot token before starting OAuth
+const tokenBefore = await getCapacitorAuthToken({ storagePrefix: 'better-auth' })
+
+// 2. Start sign-in (fire-and-forget on native)
+authClient.signIn.social({ provider: 'google', callbackURL: '/dashboard' })
+
+// 3. Poll for token change
+const poll = setInterval(async () => {
+  const token = await getCapacitorAuthToken({ storagePrefix: 'better-auth' })
+  if (token && token !== tokenBefore) {
+    clearInterval(poll)
+    // Token changed - auth succeeded, navigate!
+    router.push('/dashboard')
+  }
+}, 500)
+```
+
+The plugin also dispatches a `better-auth:session-update` DOM event after successful OAuth, which can be used as an alternative.
+
 ## Platform Detection
 
 ```typescript
@@ -264,6 +314,7 @@ else {
 
 | Export | Description |
 |--------|-------------|
+| `withCapacitor(options, capacitorOpts?)` | Wrapper that adds plugin + disables redirect on native |
 | `capacitorClient(options?)` | Client-side Better Auth plugin for Capacitor |
 | `getCapacitorAuthToken(options?)` | Get bearer token from storage |
 | `setCapacitorAuthToken(options)` | Store token for custom auth endpoints |

@@ -43,13 +43,13 @@
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "files": [
+    "BetterAuthCapacitor.podspec",
+    "Package.swift",
+    "android/build.gradle",
+    "android/src/main",
     "dist",
     "ios/Sources",
-    "ios/Tests",
-    "android/src/main",
-    "android/build.gradle",
-    "Package.swift",
-    "BetterAuthCapacitor.podspec"
+    "ios/Tests"
   ],
   "capacitor": {
     "ios": {
