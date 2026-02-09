@@ -27,6 +27,10 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
+    "./client": {
+      "types": "./dist/client.d.mts",
+      "import": "./dist/client.mjs"
+    },
     "./plugins": {
       "types": "./dist/plugins/index.d.mts",
       "import": "./dist/plugins/index.mjs"
@@ -46,7 +50,11 @@
     "bumpp": "bumpp package.json",
     "release": "pnpm build && pnpm bumpp"
   },
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
   "peerDependencies": {
+    "@better-auth/core": ">=1.0.0",
     "@capacitor/app": ">=6.0.0",
     "@capacitor/browser": ">=6.0.0",
     "@capacitor/core": ">=6.0.0",
@@ -67,11 +75,13 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.2.0",
+    "@better-auth/core": "^1.4.18",
     "@capacitor/app": "^8.0.0",
     "@capacitor/browser": "^8.0.0",
     "@capacitor/core": "^8.0.2",
     "@capacitor/network": "^8.0.0",
     "@capacitor/preferences": "^8.0.0",
+    "@types/node": "^25.2.2",
     "better-auth": "^1.4.18",
     "bumpp": "^10.4.0",
     "eslint": "^9.39.2",

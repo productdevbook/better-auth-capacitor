@@ -581,7 +581,7 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
               // Get base URL from request
               const requestUrl = new URL(context.request.url)
               const baseURL = `${requestUrl.protocol}//${requestUrl.host}`
-              const proxyURL = `${baseURL}/expo-authorization-proxy?${params.toString()}`
+              const proxyURL = `${baseURL}/capacitor-authorization-proxy?${params.toString()}`
 
               // Open browser for OAuth
               await Browser.open({ url: proxyURL })
@@ -698,5 +698,6 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
   }
 }
 
-// Re-export from better-auth/cookies
 export { parseSetCookieHeader } from 'better-auth/cookies'
+export * from './focus-manager'
+export * from './online-manager'

@@ -1,6 +1,6 @@
 # better-auth-capacitor
 
-Better Auth client plugin for Capacitor/Ionic mobile apps. Provides offline-first authentication with persistent storage, OAuth flow support, and session management.
+Better Auth plugin for Capacitor/Ionic mobile apps. Provides offline-first authentication with persistent storage, OAuth flow support, and session management.
 
 ## Features
 
@@ -13,14 +13,7 @@ Better Auth client plugin for Capacitor/Ionic mobile apps. Provides offline-firs
 ## Installation
 
 ```bash
-# Using pnpm
 pnpm add better-auth-capacitor @capacitor/preferences
-
-# Using npm
-npm install better-auth-capacitor @capacitor/preferences
-
-# Using yarn
-yarn add better-auth-capacitor @capacitor/preferences
 ```
 
 ### Optional dependencies for OAuth
@@ -35,12 +28,40 @@ pnpm add @capacitor/app @capacitor/browser
 pnpm add @capacitor/network
 ```
 
-## Usage
+## Server Setup
 
-### Basic Setup
+Add the `capacitor()` plugin to your Better Auth server configuration:
 
 ```typescript
-import { capacitorClient } from 'better-auth-capacitor'
+import { betterAuth } from 'better-auth'
+import { capacitor } from 'better-auth-capacitor'
+
+export const auth = betterAuth({
+  // ... your config
+  plugins: [
+    capacitor(),
+  ],
+})
+```
+
+This registers the `/capacitor-authorization-proxy` endpoint and handles origin override for Capacitor native requests.
+
+### Options
+
+```typescript
+capacitor({
+  /**
+   * Disable origin override for Capacitor API routes
+   * When set to true, the origin header will not be overridden
+   */
+  disableOriginOverride: false,
+})
+```
+
+## Client Setup
+
+```typescript
+import { capacitorClient } from 'better-auth-capacitor/client'
 import { createAuthClient } from 'better-auth/client'
 
 const authClient = createAuthClient({
@@ -90,7 +111,7 @@ interface CapacitorClientOptions {
 For making authenticated API requests outside of Better Auth:
 
 ```typescript
-import { getCapacitorAuthToken } from 'better-auth-capacitor'
+import { getCapacitorAuthToken } from 'better-auth-capacitor/client'
 
 const token = await getCapacitorAuthToken({
   storagePrefix: 'better-auth',
@@ -108,10 +129,10 @@ if (token) {
 
 ### Storing Token from Custom Auth Endpoints
 
-If you have custom authentication endpoints that don't use the Better Auth client (e.g., dev login, server-side auth), you can manually store the session token:
+If you have custom authentication endpoints that don't use the Better Auth client:
 
 ```typescript
-import { clearCapacitorAuthToken, setCapacitorAuthToken } from 'better-auth-capacitor'
+import { clearCapacitorAuthToken, setCapacitorAuthToken } from 'better-auth-capacitor/client'
 
 // After custom login endpoint
 const response = await fetch('/api/auth/custom-login', {
@@ -140,7 +161,8 @@ await clearCapacitorAuthToken({ storagePrefix: 'better-auth' })
 Track which method the user last used to sign in:
 
 ```typescript
-import { capacitorClient, lastLoginMethodClient } from 'better-auth-capacitor'
+import { capacitorClient } from 'better-auth-capacitor/client'
+import { lastLoginMethodClient } from 'better-auth-capacitor/plugins'
 import { createAuthClient } from 'better-auth/client'
 
 const authClient = createAuthClient({
@@ -206,28 +228,7 @@ await authClient.clearStorage()
 </intent-filter>
 ```
 
-### 2. Server-side Authorization Proxy
-
-The plugin expects an `/expo-authorization-proxy` endpoint on your server that:
-1. Receives the OAuth authorization URL
-2. Handles the OAuth callback
-3. Redirects back to your app with the session cookie
-
-Example implementation with Better Auth:
-
-```typescript
-// server/api/expo-authorization-proxy.get.ts
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
-  const authorizationURL = query.authorizationURL as string
-  const oauthState = query.oauthState as string
-
-  // Redirect to the OAuth provider
-  return sendRedirect(event, authorizationURL)
-})
-```
-
-### 3. Callback URL Configuration
+### 2. Callback URL Configuration
 
 When initiating OAuth sign-in, use relative callback URLs:
 
@@ -241,7 +242,7 @@ await authClient.signIn.social({
 ## Platform Detection
 
 ```typescript
-import { isNativePlatform } from 'better-auth-capacitor'
+import { isNativePlatform } from 'better-auth-capacitor/client'
 
 if (isNativePlatform()) {
   // Running in Capacitor native app
@@ -253,17 +254,28 @@ else {
 
 ## API Reference
 
-### Main Exports
+### Server Export (`better-auth-capacitor`)
 
 | Export | Description |
 |--------|-------------|
-| `capacitorClient(options?)` | Main Better Auth plugin for Capacitor |
+| `capacitor(options?)` | Server-side Better Auth plugin for Capacitor |
+
+### Client Exports (`better-auth-capacitor/client`)
+
+| Export | Description |
+|--------|-------------|
+| `capacitorClient(options?)` | Client-side Better Auth plugin for Capacitor |
 | `getCapacitorAuthToken(options?)` | Get bearer token from storage |
 | `setCapacitorAuthToken(options)` | Store token for custom auth endpoints |
 | `clearCapacitorAuthToken(options?)` | Clear stored auth token |
 | `isNativePlatform()` | Check if running in Capacitor native app |
 | `setupCapacitorFocusManager()` | Set up app focus tracking |
 | `setupCapacitorOnlineManager()` | Set up network connectivity tracking |
+| `normalizeCookieName(name)` | Normalize cookie name for storage |
+| `getCookie(cookie)` | Convert stored cookies to header string |
+| `getSetCookie(header, prevCookie?)` | Merge new cookies with existing |
+| `hasBetterAuthCookies(header, prefix)` | Check if header contains auth cookies |
+| `parseSetCookieHeader` | Re-exported from `better-auth/cookies` |
 
 ### Plugin Exports (`better-auth-capacitor/plugins`)
 
@@ -271,19 +283,10 @@ else {
 |--------|-------------|
 | `lastLoginMethodClient(config?)` | Track last used login method |
 
-### Utility Exports
-
-| Export | Description |
-|--------|-------------|
-| `normalizeCookieName(name)` | Normalize cookie name for storage |
-| `getCookie(cookie)` | Convert stored cookies to header string |
-| `getSetCookie(header, prevCookie?)` | Merge new cookies with existing |
-| `hasBetterAuthCookies(header, prefix)` | Check if header contains auth cookies |
-| `parseSetCookieHeader` | Re-exported from `better-auth/cookies` |
-
 ## Requirements
 
 - `better-auth` >= 1.0.0
+- `@better-auth/core` >= 1.0.0
 - `@capacitor/core` >= 6.0.0
 - `@capacitor/preferences` >= 6.0.0
 
