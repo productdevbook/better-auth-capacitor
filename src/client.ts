@@ -582,6 +582,11 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
                   const toSetCookie = getSetCookie(cookie, prevCookie ?? undefined)
                   await Preferences.set({ key: normalizedCookieName, value: toSetCookie })
                   store?.notify('$sessionSignal')
+
+                  // Dispatch event so UI can react without waiting for signIn.social to resolve
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('better-auth:session-update'))
+                  }
                 }
               }
               catch {
