@@ -551,6 +551,10 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
             ) {
               const signInURL = context.data?.url as string
 
+              // Prevent better-auth's default redirect (would open Safari)
+              context.data.redirect = false
+              delete context.data.url
+
               const storedCookieJson = (await Preferences.get({ key: normalizedCookieName }))?.value
               const oauthStateValue = getOAuthStateValue(storedCookieJson ?? null, cookiePrefix)
 
