@@ -50,9 +50,6 @@
     "bumpp": "bumpp package.json",
     "release": "pnpm build && pnpm bumpp"
   },
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
   "peerDependencies": {
     "@better-auth/core": ">=1.0.0",
     "@capacitor/app": ">=6.0.0",
@@ -72,6 +69,9 @@
     "@capacitor/network": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.2.0",

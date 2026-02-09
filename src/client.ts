@@ -698,6 +698,6 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
   }
 }
 
-export { parseSetCookieHeader } from 'better-auth/cookies'
 export * from './focus-manager'
 export * from './online-manager'
+export { parseSetCookieHeader } from 'better-auth/cookies'
