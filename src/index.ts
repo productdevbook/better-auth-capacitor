@@ -11,6 +11,7 @@ export interface CapacitorOptions {
 }
 
 declare module '@better-auth/core' {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   interface BetterAuthPluginRegistry<AuthOptions, Options> {
     capacitor: {
       creator: typeof capacitor
@@ -21,8 +22,9 @@ declare module '@better-auth/core' {
 export function capacitor(options?: CapacitorOptions | undefined) {
   return {
     id: 'capacitor',
-    init: (ctx) => {
+    init: (_ctx) => {
       const trustedOrigins
+        // eslint-disable-next-line node/prefer-global/process
         = process.env.NODE_ENV === 'development'
           ? ['capacitor://', 'ionic://']
           : ['capacitor://', 'ionic://']
@@ -33,7 +35,7 @@ export function capacitor(options?: CapacitorOptions | undefined) {
         },
       }
     },
-    async onRequest(request, ctx) {
+    async onRequest(request, _ctx) {
       if (options?.disableOriginOverride || request.headers.get('origin')) {
         return
       }
