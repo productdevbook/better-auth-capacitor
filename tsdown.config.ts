@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/client.ts', 'src/plugins/index.ts'],
+  entry: ['src/index.ts', 'src/client.ts', 'src/plugins/index.ts', 'src/native.ts'],
   format: ['esm'],
   dts: true,
   clean: true,
@@ -16,7 +16,6 @@ export default defineConfig({
     '@capacitor/core',
     '@capacitor/preferences',
     '@capacitor/app',
-    '@capacitor/browser',
     '@capacitor/network',
   ],
 })

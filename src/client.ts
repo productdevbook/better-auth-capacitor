@@ -20,28 +20,12 @@ function safeJSONParse<T>(str: string): T | null {
 
 // Lazy-loaded module references (cached to avoid re-importing)
 let _PreferencesMod: typeof import('@capacitor/preferences') | null = null
-let _BrowserMod: typeof import('@capacitor/browser') | null = null
-let _AppMod: typeof import('@capacitor/app') | null = null
 
 async function getPreferencesMod() {
   if (!_PreferencesMod) {
     _PreferencesMod = await import('@capacitor/preferences')
   }
   return _PreferencesMod
-}
-
-async function getBrowserMod() {
-  if (!_BrowserMod) {
-    _BrowserMod = await import('@capacitor/browser')
-  }
-  return _BrowserMod
-}
-
-async function getAppMod() {
-  if (!_AppMod) {
-    _AppMod = await import('@capacitor/app')
-  }
-  return _AppMod
 }
 
 /**
@@ -565,9 +549,6 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
               && !context.request?.body?.includes?.('idToken') // idToken is for silent sign-in
               && scheme
             ) {
-              const [{ Browser }, { App }] = await Promise.all([getBrowserMod(), getAppMod()])
-
-              const callbackURL = JSON.parse(context.request.body)?.callbackURL
               const signInURL = context.data?.url as string
 
               const storedCookieJson = (await Preferences.get({ key: normalizedCookieName }))?.value
@@ -580,38 +561,26 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
 
               const proxyURL = `${context.request.baseURL}/capacitor-authorization-proxy?${params.toString()}`
 
-              // Open browser for OAuth
-              await Browser.open({ url: proxyURL })
+              // Use native ASWebAuthenticationSession (iOS) / Chrome Custom Tabs (Android)
+              const { AuthSession } = await import('./native')
+              try {
+                const result = await AuthSession.openAuthSession({
+                  url: proxyURL,
+                  redirectScheme: scheme,
+                })
 
-              // Listen for deep link callback
-              const handle = await App.addListener('appUrlOpen', async ({ url }) => {
-                try {
-                  const urlObj = new URL(url)
-                  const cookie = urlObj.searchParams.get('cookie')
-                  if (cookie) {
-                    const prevCookie = (await Preferences.get({ key: normalizedCookieName }))?.value
-                    const toSetCookie = getSetCookie(cookie, prevCookie ?? undefined)
-                    await Preferences.set({ key: normalizedCookieName, value: toSetCookie })
-                    store?.notify('$sessionSignal')
-                  }
-
-                  // Check if callback matches expected URL
-                  const cleanUrl = url.split('?')[0]
-                  if (callbackURL && (urlObj.pathname === callbackURL || cleanUrl === callbackURL)) {
-                    // Close browser
-                    try {
-                      await Browser.close()
-                    }
-                    catch {
-                      // Browser may already be closed
-                    }
-                    handle.remove()
-                  }
+                const resultUrl = new URL(result.url)
+                const cookie = resultUrl.searchParams.get('cookie')
+                if (cookie) {
+                  const prevCookie = (await Preferences.get({ key: normalizedCookieName }))?.value
+                  const toSetCookie = getSetCookie(cookie, prevCookie ?? undefined)
+                  await Preferences.set({ key: normalizedCookieName, value: toSetCookie })
+                  store?.notify('$sessionSignal')
                 }
-                catch {
-                  // Invalid URL, ignore
-                }
-              })
+              }
+              catch {
+                // User canceled or auth failed - silently ignore
+              }
             }
           },
         },
