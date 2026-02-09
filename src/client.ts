@@ -492,7 +492,7 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
         id: 'capacitor',
         name: 'Capacitor Auth',
         hooks: {
-          async onSuccess(context: { response: Response, data: Record<string, unknown>, request: { url: string | URL, body: string } }) {
+          async onSuccess(context: { response: Response, data: Record<string, unknown>, request: { url: string | URL, body: string, baseURL?: string } }) {
             if (!isNativePlatform())
               return
 
@@ -578,10 +578,7 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
                 params.append('oauthState', oauthStateValue)
               }
 
-              // Get base URL from request
-              const requestUrl = new URL(context.request.url)
-              const baseURL = `${requestUrl.protocol}//${requestUrl.host}`
-              const proxyURL = `${baseURL}/capacitor-authorization-proxy?${params.toString()}`
+              const proxyURL = `${context.request.baseURL}/capacitor-authorization-proxy?${params.toString()}`
 
               // Open browser for OAuth
               await Browser.open({ url: proxyURL })
@@ -599,7 +596,8 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
                   }
 
                   // Check if callback matches expected URL
-                  if (callbackURL && urlObj.pathname === callbackURL) {
+                  const cleanUrl = url.split('?')[0]
+                  if (callbackURL && (urlObj.pathname === callbackURL || cleanUrl === callbackURL)) {
                     // Close browser
                     try {
                       await Browser.close()
