@@ -542,16 +542,18 @@ export function capacitorClient(opts?: CapacitorClientOptions): BetterAuthClient
             }
 
             // Handle OAuth redirect for social sign-in
+            // Server-side capacitor plugin sets redirect=false for Capacitor clients,
+            // so we check for url presence (not redirect flag) to trigger native auth
             if (
-              context.data?.redirect
+              context.data?.url
               && (context.request.url.toString().includes('/sign-in')
                 || context.request.url.toString().includes('/link-social'))
               && !context.request?.body?.includes?.('idToken') // idToken is for silent sign-in
               && scheme
             ) {
-              const signInURL = context.data?.url as string
+              const signInURL = context.data.url as string
 
-              // Prevent better-auth's default redirect (would open Safari)
+              // Defense-in-depth: ensure redirectPlugin doesn't fire (for older servers without the after hook)
               context.data.redirect = false
               delete context.data.url
 

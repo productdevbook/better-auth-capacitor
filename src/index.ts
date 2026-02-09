@@ -62,6 +62,29 @@ export function capacitor(options?: CapacitorOptions | undefined) {
         {
           matcher(context) {
             return !!(
+              context.path?.startsWith('/sign-in/social')
+              || context.path?.startsWith('/sign-in/oauth2')
+              || context.path?.startsWith('/link-social')
+            )
+          },
+          handler: createAuthMiddleware(async (ctx) => {
+            // When request comes from a Capacitor client, disable redirect
+            // so better-auth's built-in redirectPlugin doesn't fire window.location.href
+            // The capacitor client plugin handles OAuth via ASWebAuthenticationSession/CustomTabs instead
+            const capacitorOrigin = ctx.headers?.get('capacitor-origin')
+            if (!capacitorOrigin) {
+              return
+            }
+
+            const returned = ctx.context.returned as { url?: string, redirect?: boolean } | undefined
+            if (returned?.url && returned?.redirect) {
+              ctx.context.returned = { ...returned, redirect: false }
+            }
+          }),
+        },
+        {
+          matcher(context) {
+            return !!(
               context.path?.startsWith('/callback')
               || context.path?.startsWith('/oauth2/callback')
               || context.path?.startsWith('/magic-link/verify')
