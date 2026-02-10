@@ -51,7 +51,13 @@ export function capacitor(options?: CapacitorOptions | undefined) {
       // Construct new Headers with new Request to avoid mutating the original request
       const newHeaders = new Headers(request.headers)
       newHeaders.set('origin', capacitorOrigin)
-      const req = new Request(request, { headers: newHeaders })
+      const req = new Request(request.url, {
+        method: request.method,
+        headers: newHeaders,
+        body: request.body,
+        // @ts-expect-error duplex needed for streaming bodies in Node
+        duplex: request.body ? 'half' : undefined,
+      })
 
       return {
         request: req,
